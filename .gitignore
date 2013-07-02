@@ -1,6 +1,8 @@
 *.class
 
 # Package Files #
-*.jar
 *.war
 *.ear
+/Wallet/nbproject/private/
+/Wallet/build/
+/Wallet/dist/
