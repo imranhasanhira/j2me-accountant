@@ -15,6 +15,16 @@ public class Account {
     double totalBalance;
 
     public Account() {
-        name = "acc";
+        this("account");
+    }
+
+    public Account(String name) {
+        this(-1, name, 0);
+    }
+
+    public Account(long id, String name, double totalBalance) {
+        this.id = id;
+        this.name = name;
+        this.totalBalance = totalBalance;
     }
 }
