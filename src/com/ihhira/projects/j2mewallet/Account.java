@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package wallet;
+package com.ihhira.projects.j2mewallet;
 
 /**
  *
@@ -26,5 +26,9 @@ public class Account {
         this.id = id;
         this.name = name;
         this.totalBalance = totalBalance;
+    }
+
+    public String toString() {
+        return name + "(" + totalBalance + ")";
     }
 }
