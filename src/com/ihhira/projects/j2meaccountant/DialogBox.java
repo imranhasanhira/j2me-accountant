@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ihhira.projects.j2mewallet;
+package com.ihhira.projects.j2meaccountant;
 
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
@@ -37,10 +37,10 @@ public abstract class DialogBox extends Form {
         setCommandListener(new CommandListener() {
             public void commandAction(Command c, Displayable d) {
                 actionPerformed(c.getCommandType() == Command.OK ? RESPONSE_TYPE_OK : RESPONSE_TYPE_CANCEL, textField.getString());
-                Wallet.setCurrent(displayable);
+                Accountant.setCurrent(displayable);
             }
         });
-        Wallet.setCurrent(this);
+        Accountant.setCurrent(this);
     }
 
     protected abstract void actionPerformed(int response, String text);

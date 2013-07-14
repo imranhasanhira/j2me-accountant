@@ -2,26 +2,25 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ihhira.projects.j2mewallet;
+package com.ihhira.projects.j2meaccountant;
 
 import javax.microedition.lcdui.Alert;
 import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.midlet.*;
-import net.sourceforge.floggy.persistence.PersistableManager;
 
 /**
  * @author Imran
  */
-public class Wallet extends MIDlet {
+public class Accountant extends MIDlet {
 
     static Display display;
-    static Wallet wallet;
+    static Accountant accountant;
 
     public void startApp() {
         display = Display.getDisplay(this);
-        wallet = this;
+        accountant = this;
 
         Database.init();
 
@@ -52,7 +51,7 @@ public class Wallet extends MIDlet {
     }
 
     public static void exit() {
-        wallet.destroyApp(true);
-        wallet.notifyDestroyed();
+        accountant.destroyApp(true);
+        accountant.notifyDestroyed();
     }
 }

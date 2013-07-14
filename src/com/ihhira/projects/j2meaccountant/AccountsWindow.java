@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ihhira.projects.j2mewallet;
+package com.ihhira.projects.j2meaccountant;
 
 import java.util.Vector;
 import javax.microedition.lcdui.AlertType;
@@ -55,12 +55,12 @@ public class AccountsWindow extends List implements CommandListener {
     public void commandAction(Command c, Displayable d) {
         int selectedIndex = getSelectedIndex();
         if (c == exitCommand) {
-            Wallet.exit();
+            Accountant.exit();
         } else if (c == settingsCommand) {
-            Wallet.setCurrent("Info", "Coming soon", AlertType.INFO, this);
+            Accountant.setCurrent("Info", "Coming soon", AlertType.INFO, this);
         } else if (c == categoriesCommand) {
             CategoriesWindow categoriesWindow = new CategoriesWindow("Categories");
-            Wallet.setCurrent(categoriesWindow);
+            Accountant.setCurrent(categoriesWindow);
         } else if (c == deleteCommand) {
             if (selectedIndex != -1) {
                 Account account = (Account) accounts.elementAt(selectedIndex);
@@ -82,7 +82,7 @@ public class AccountsWindow extends List implements CommandListener {
                 Account account = (Account) accounts.elementAt(selectedIndex);
                 Log.log("Showing account - " + account);
                 TransactionWindow tw = new TransactionWindow(account);
-                Wallet.setCurrent(tw);
+                Accountant.setCurrent(tw);
             }
         }
     }

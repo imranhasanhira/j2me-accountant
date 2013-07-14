@@ -1,0 +1,8 @@
+MIDlet-1: Midlet, ,com.ihhira.projects.j2meaccountant.Accountant
+MIDlet-Jar-Size: 84458
+MIDlet-Jar-URL: Accountant.jar
+MIDlet-Name: Accountant
+MIDlet-Vendor: Md Imran Hasan Hira
+MIDlet-Version: 1.0
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0

@@ -3,7 +3,5 @@
 # Package Files #
 *.war
 *.ear
-/Wallet/nbproject/private/
-/Wallet/build/
-/Wallet/dist/
 /dist/
+/build/

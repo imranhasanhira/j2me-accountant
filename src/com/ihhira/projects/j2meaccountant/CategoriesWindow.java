@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.ihhira.projects.j2mewallet;
+package com.ihhira.projects.j2meaccountant;
 
 import java.util.Vector;
 import javax.microedition.lcdui.Command;
@@ -43,7 +43,7 @@ public class CategoriesWindow extends List implements CommandListener {
         int selectedIndex = getSelectedIndex();
         if (c == backCommand) {
             AccountsWindow accountWindow = new AccountsWindow();
-            Wallet.setCurrent(accountWindow);
+            Accountant.setCurrent(accountWindow);
         } else if (c == deleteCommand) {
             deleteCategory(selectedIndex);
         } else if (c == editCommand) {
