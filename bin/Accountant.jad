@@ -1,5 +1,5 @@
-MIDlet-1: Midlet, ,com.ihhira.projects.j2meaccountant.Accountant
-MIDlet-Jar-Size: 84458
+MIDlet-1: Midlet,/com/ihhira/projects/j2meaccountant/icon.png,com.ihhira.projects.j2meaccountant.Accountant
+MIDlet-Jar-Size: 87019
 MIDlet-Jar-URL: Accountant.jar
 MIDlet-Name: Accountant
 MIDlet-Vendor: Md Imran Hasan Hira
