@@ -9,6 +9,7 @@ import javax.microedition.lcdui.AlertType;
 import javax.microedition.lcdui.Display;
 import javax.microedition.lcdui.Displayable;
 import javax.microedition.midlet.*;
+import net.sourceforge.floggy.persistence.PersistableManager;
 
 /**
  * @author Imran
@@ -29,11 +30,7 @@ public class Wallet extends MIDlet {
     }
 
     public void pauseApp() {
-//        try {
-//            PersistableManager.getInstance().shutdown();
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
+        Database.close();
         System.gc();
     }
 
@@ -42,11 +39,7 @@ public class Wallet extends MIDlet {
      * @param unconditional
      */
     public void destroyApp(boolean unconditional) {
-//        try {
-//            PersistableManager.getInstance().shutdown();
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//        }
+        Database.close();
     }
 
     public static void setCurrent(Displayable displayable) {

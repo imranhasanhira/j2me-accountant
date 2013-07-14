@@ -4,13 +4,15 @@
  */
 package com.ihhira.projects.j2mewallet;
 
+import net.sourceforge.floggy.persistence.Persistable;
+
 /**
  *
  * @author Imran
  */
-public class Account {
+public class Account implements Persistable{
 
-    long id;
+    int id;
     String name;
     double totalBalance;
 
@@ -22,7 +24,7 @@ public class Account {
         this(-1, name, 0);
     }
 
-    public Account(long id, String name, double totalBalance) {
+    public Account(int id, String name, double totalBalance) {
         this.id = id;
         this.name = name;
         this.totalBalance = totalBalance;
@@ -30,5 +32,11 @@ public class Account {
 
     public String toString() {
         return name + "(" + totalBalance + ")";
+    }
+
+    public void copyTo(Account acc) {
+        acc.id = id;
+        acc.name = name;
+        acc.totalBalance = totalBalance;
     }
 }

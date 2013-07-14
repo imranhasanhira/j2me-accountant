@@ -80,4 +80,30 @@
             </target>
 
             -->
+            
+            <!-- 
+        IMPORTANT: You must change the value of this property pointing it to the directory
+        where you have installed Floggy.
+        
+        Some examples:
+        Linux: /opt/floggy
+        Windows: c:\floggy
+    -->
+    <property name="floggy.path" value="E:\CoCuri\Netbeans_Projects\wallet\floggy\"/>
+    
+    <path id="floggy.classpath">
+        <fileset dir="${floggy.path}\lib" includes="*.jar"/>
+    </path>
+    
+    <target name="post-compile">
+        <taskdef 
+            name="floggy-persistence-weaver" 
+            classname="net.sourceforge.floggy.persistence.WeaverTask"
+            classpathref="floggy.classpath"/>
+        <floggy-persistence-weaver
+            bootclasspath="${platform.bootclasspath}"
+            classpath="${libs.classpath}"
+            input="${build.classes.dir}"
+            output="${build.classes.dir}"/>
+    </target>
 </project>

@@ -5,6 +5,11 @@
 package com.ihhira.projects.j2mewallet;
 
 import java.util.Vector;
+import net.sourceforge.floggy.persistence.Filter;
+import net.sourceforge.floggy.persistence.FloggyException;
+import net.sourceforge.floggy.persistence.ObjectSet;
+import net.sourceforge.floggy.persistence.Persistable;
+import net.sourceforge.floggy.persistence.PersistableManager;
 
 /**
  *
@@ -12,70 +17,191 @@ import java.util.Vector;
  */
 public class Database {
 
-    static Vector accounts;
-    static Vector categories;
+    static PersistableManager pm;
     static Vector transactions;
 
     public static void init() {
-        accounts = new Vector();
-        accounts.addElement(new Account());
-        accounts.addElement(new Account());
-        accounts.addElement(new Account());
-
-        categories = new Vector();
-        categories.addElement(new Category());
-        categories.addElement(new Category());
-        categories.addElement(new Category());
-
-        transactions = new Vector();
-        transactions.addElement(new Transaction());
-        transactions.addElement(new Transaction());
-        transactions.addElement(new Transaction());
-        transactions.addElement(new Transaction());
-        transactions.addElement(new Transaction());
-    }
-
-    public static Vector getAccounts() {
-        return accounts;
-    }
-
-    public static Vector getCategories() {
-        return categories;
-    }
-
-    public static Vector getTransactions() {
-        return transactions;
+        pm = PersistableManager.getInstance();
     }
 
     static void close() {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        try {
+            if (pm != null) {
+                pm.shutdown();
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static Vector getAccounts() {
+        Vector accounts = new Vector();
+        try {
+            Log.log("Listing accounts...");
+            ObjectSet taccounts = pm.find(Account.class, null, null);
+            accounts.ensureCapacity(taccounts.size());
+            for (int i = 0; i < taccounts.size(); i++) {
+                accounts.addElement(taccounts.get(i));
+            }
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+        
+        if (accounts.size() <= 0) {
+            addAccount(new Account("Current Account"));
+            accounts = Database.getAccounts();
+        }
+        return accounts;
     }
 
     static void deleteAccount(Account account) {
-        for (int i = 0; i < accounts.size(); i++) {
-            if (account.id == ((Account) accounts.elementAt(i)).id) {
-                accounts.removeElement(account);
-                System.out.println("Account deleted : " + account.name);
-                break;
-            }
+        try {
+            removeAllTransactionFromAccount(account);
+            pm.delete(account);
+            Log.log("Account deleted " + account.name);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
         }
     }
 
     static void addAccount(Account account) {
-        accounts.addElement(account);
-        System.out.println("Account added : " + account.name);
+        try {
+            account.id = pm.save(account);
+            Log.log("Account added : " + account.name);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+
     }
 
     static void updateAccount(Account account) {
-        for (int i = 0; i < accounts.size(); i++) {
-            Account vAccount = ((Account) accounts.elementAt(i));
-            if (account.id == vAccount.id) {
-                vAccount.id = account.id;
-                vAccount.name = account.name;
-                vAccount.totalBalance = account.totalBalance;
-                System.out.println("Account updated : " + account.name);
-                break;
+        try {
+            pm.save(account);
+            Log.log("Account updated : " + account.name);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static Vector getCategories() {
+        Vector categories = new Vector();
+        try {
+            Log.log("Listing categories...");
+            ObjectSet tcategories = pm.find(Category.class, null, null);
+            categories.ensureCapacity(tcategories.size());
+            for (int i = 0; i < tcategories.size(); i++) {
+                categories.addElement(tcategories.get(i));
             }
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+
+        if (categories.size() <= 0) {
+            addCategory(new Category("Miscellaneous"));
+            categories = null;
+            categories = getCategories();
+        }
+        return categories;
+    }
+
+    public static Category getCategory(int id) {
+        try {
+            Category category = new Category();
+            pm.load(category, id);
+            return category;
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    static void addCategory(Category category) {
+        try {
+            category.id = pm.save(category);
+            Log.log("Category added " + category.name);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    static void updateCategory(Category category) {
+        try {
+            pm.save(category);
+            Log.log("Category updagted " + category.name);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    static void deleteCategory(Category category) {
+        try {
+            pm.delete(category);
+            Log.log("Category deleted " + category.name);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public static Vector getTransactions(final Account account) {
+        Log.log("Listing transactions...");
+        Vector traVector = new Vector();
+        try {
+            ObjectSet transactions = pm.find(Transaction.class, new Filter() {
+                public boolean matches(Persistable prstbl) {
+                    return ((Transaction) prstbl).match(account);
+                }
+            }, null);
+            traVector.ensureCapacity(transactions.size());
+            for (int i = 0; i < transactions.size(); i++) {
+                traVector.addElement(transactions.get(i));
+            }
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+        return traVector;
+    }
+
+    static void deleteTransaction(Transaction transaction) {
+        try {
+            pm.delete(transaction);
+            Log.log("Transaction deleted : " + transaction.description);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    static void updateTransaction(Transaction transaction) {
+        try {
+            pm.save(transaction);
+            Log.log("Transaction updated : " + transaction.description);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
+    static void addTransaction(Transaction transaction) {
+        try {
+            pm.save(transaction);
+            Log.log("Transaction added : " + transaction.description);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static void removeAllTransactionFromAccount(final Account account) {
+        try {
+            ObjectSet transactions = pm.find(Transaction.class, new Filter() {
+                public boolean matches(Persistable prstbl) {
+                    return ((Transaction) prstbl).match(account);
+                }
+            }, null);
+            for (int i = 0; i < transactions.size(); i++) {
+                pm.delete(transactions.get(i));
+            }
+            Log.log("All Transaction added from " + account.name);
+        } catch (FloggyException ex) {
+            ex.printStackTrace();
         }
     }
 }

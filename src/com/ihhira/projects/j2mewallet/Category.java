@@ -4,21 +4,31 @@
  */
 package com.ihhira.projects.j2mewallet;
 
+import net.sourceforge.floggy.persistence.Persistable;
+
 /**
  *
  * @author Imran
  */
-public class Category {
+public class Category implements Persistable {
 
-    long id;
+    int id;
     String name;
 
     public Category() {
-        this(-1, "cat");
+        this(0, "cat");
     }
 
-    public Category(long id, String name) {
+    public Category(String name) {
+        this(0, name);
+    }
+
+    public Category(int id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public String toString() {
+        return name;
     }
 }
