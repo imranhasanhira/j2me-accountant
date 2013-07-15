@@ -6,6 +6,7 @@ package com.ihhira.projects.j2meaccountant;
 
 import java.util.Vector;
 import javax.microedition.lcdui.AlertType;
+import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
@@ -28,13 +29,17 @@ public class AccountsWindow extends List implements CommandListener {
 
     public AccountsWindow() {
         super("Accounts", List.IMPLICIT);
+        setFitPolicy(Choice.TEXT_WRAP_ON);
 
         exitCommand = new Command("Exit", Command.EXIT, 0);
         settingsCommand = new Command("Settings", Command.ITEM, 1);
-        categoriesCommand = new Command("Categories", Command.ITEM, 2);
-        deleteCommand = new Command("Delete", Command.ITEM, 3);
-        editCommand = new Command("Edit", Command.ITEM, 4);
-        addCommand = new Command("Add", Command.ITEM, 5);
+        categoriesCommand = new Command("Show Categories", Command.ITEM, 2);
+        deleteCommand = new Command("Delete Account", Command.ITEM, 3);
+        editCommand = new Command("Edit Account", Command.ITEM, 4);
+        addCommand = new Command("Add Account", Command.ITEM, 5);
+
+
+
         showCommand = new Command("Show", Command.ITEM, 6);
 
         addCommand(exitCommand);
@@ -46,7 +51,6 @@ public class AccountsWindow extends List implements CommandListener {
         addCommand(showCommand);
 
         setCommandListener(this);
-
 
         refreshAccountList();
 
@@ -102,7 +106,7 @@ public class AccountsWindow extends List implements CommandListener {
      */
     private void showAcountForm(final Account existingAccount) {
         String existingName = (existingAccount == null ? "" : existingAccount.name);
-        DialogBox dialogBox = new DialogBox(this, "New Account", "Account name", existingName, 20) {
+        DialogBox dialogBox = new DialogBox(this, "New Account", "Account name", existingName, 30) {
             protected void actionPerformed(int response, String text) {
                 if (response == DialogBox.RESPONSE_TYPE_OK && text.length() > 0) {
 
@@ -125,7 +129,7 @@ public class AccountsWindow extends List implements CommandListener {
         accounts = Database.getAccounts();
         for (int i = 0; i < accounts.size(); i++) {
             Account acc = (Account) accounts.elementAt(i);
-            append(acc.name, null);
+            append(acc.name + " : " + Database.getAccountBalance(acc), null);
         }
     }
 }

@@ -10,33 +10,30 @@ import net.sourceforge.floggy.persistence.Persistable;
  *
  * @author Imran
  */
-public class Account implements Persistable{
+public class Account implements Persistable {
 
     int id;
     String name;
-    double totalBalance;
 
     public Account() {
-        this("account");
+        this("");
     }
 
     public Account(String name) {
-        this(-1, name, 0);
+        this(-1, name);
     }
 
-    public Account(int id, String name, double totalBalance) {
+    public Account(int id, String name) {
         this.id = id;
         this.name = name;
-        this.totalBalance = totalBalance;
     }
 
     public String toString() {
-        return name + "(" + totalBalance + ")";
+        return name;
     }
 
     public void copyTo(Account acc) {
         acc.id = id;
         acc.name = name;
-        acc.totalBalance = totalBalance;
     }
 }

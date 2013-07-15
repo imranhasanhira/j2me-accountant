@@ -5,6 +5,7 @@
 package com.ihhira.projects.j2meaccountant;
 
 import java.util.Vector;
+import javax.microedition.lcdui.Choice;
 import javax.microedition.lcdui.Command;
 import javax.microedition.lcdui.CommandListener;
 import javax.microedition.lcdui.Displayable;
@@ -24,11 +25,12 @@ public class CategoriesWindow extends List implements CommandListener {
 
     public CategoriesWindow(String title) {
         super(title, List.IMPLICIT);
+        setFitPolicy(Choice.TEXT_WRAP_ON);
 
         backCommand = new Command("Back", Command.BACK, 0);
-        deleteCommand = new Command("Delete", Command.ITEM, 1);
-        editCommand = new Command("Edit", Command.ITEM, 2);
-        addCommand = new Command("Add", Command.ITEM, 3);
+        deleteCommand = new Command("Delete Category", Command.ITEM, 1);
+        editCommand = new Command("Edit Category", Command.ITEM, 2);
+        addCommand = new Command("Add Category", Command.ITEM, 3);
 
         addCommand(backCommand);
         addCommand(addCommand);
@@ -67,10 +69,6 @@ public class CategoriesWindow extends List implements CommandListener {
     private void refreshCategories() {
         deleteAll();
         categories = Database.getCategories();
-        if (categories.size() <= 0) {
-            Database.addCategory(new Category("Misc"));
-            categories = Database.getCategories();
-        }
         for (int i = 0; i < categories.size(); i++) {
             append(((Category) categories.elementAt(i)).name, null);
         }
@@ -90,7 +88,7 @@ public class CategoriesWindow extends List implements CommandListener {
             cat = ((Category) categories.elementAt(selectedIndex));
         }
 
-        DialogBox dialogBox = new DialogBox(this, "New Category", "Category name", cat.name, 20) {
+        DialogBox dialogBox = new DialogBox(this, "New Category", "Category name", cat.name, 30) {
             protected void actionPerformed(int response, String text) {
                 if (response == RESPONSE_TYPE_OK && text.length() > 0) {
                     if (selectedIndex == -1) {

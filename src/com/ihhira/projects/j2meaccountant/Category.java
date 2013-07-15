@@ -16,7 +16,7 @@ public class Category implements Persistable {
     String name;
 
     public Category() {
-        this(0, "cat");
+        this(0, "");
     }
 
     public Category(String name) {
