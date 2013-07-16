@@ -4,27 +4,30 @@
  */
 package com.ihhira.projects.j2meaccountant;
 
-import java.util.Calendar;
-import java.util.Date;
+import com.ihhira.projects.j2meaccountant.model.Database;
+import com.ihhira.projects.j2meaccountant.model.Account;
+import com.ihhira.projects.j2meaccountant.model.Transaction;
+import com.sun.lwuit.Command;
+import com.sun.lwuit.Dialog;
+import com.sun.lwuit.Form;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.table.DefaultTableModel;
+import com.sun.lwuit.table.Table;
 import java.util.Vector;
-import javax.microedition.lcdui.AlertType;
-import javax.microedition.lcdui.Choice;
-import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.List;
 
 /**
  *
  * @author Imran
  */
-public class TransactionWindow extends List implements CommandListener {
+public class TransactionWindow extends Form implements ActionListener {
 
     private final int TRANSACTION_DEPOSITE = -1;
     private final int TRANSACTION_SPEND = -2;
     private final int TRANSACTION_TRANSFER = -3;
     Account account;
     Vector transactions;
+    Table transactionTable;
     private final Command backCommand;
     private final Command deleteCommand;
     private final Command editCommand;
@@ -33,81 +36,72 @@ public class TransactionWindow extends List implements CommandListener {
     private final Command transferCommand;
 
     TransactionWindow(Account account) {
-        super(account.toString(), IMPLICIT);
-        setFitPolicy(Choice.TEXT_WRAP_ON);
+        super(account.toString());
         this.account = account;
+        transactionTable = new Table();
+        addComponent(transactionTable);
 
 
-        backCommand = new Command("Back", Command.BACK, 0);
-        deleteCommand = new Command("Delete", Command.ITEM, 1);
-        editCommand = new Command("Edit", Command.ITEM, 2);
-        depositeCommand = new Command("Add", Command.ITEM, 3);
-        spendCommand = new Command("Spend", Command.ITEM, 4);
-        transferCommand = new Command("Transfer fund", Command.ITEM, 6);
+        backCommand = new Command("Back");
+        deleteCommand = new Command("Delete");
+        editCommand = new Command("Edit");
+        depositeCommand = new Command("Add");
+        spendCommand = new Command("Spend");
+        transferCommand = new Command("Transfer fund");
 
         addCommand(backCommand);
         addCommand(depositeCommand);
         addCommand(spendCommand);
         addCommand(transferCommand);
-        setCommandListener(this);
+
+        addCommandListener(this);
 
         refreshTransactions();
-        refreshCommands();
 
         if (transactions.size() <= 0) {
-//            Accountant.setCurrent("Empty Transaction list", "Please add a transaction", AlertType.INFO, this);
-        }
-
-    }
-
-    public void commandAction(Command c, Displayable d) {
-        int selectedIndex = getSelectedIndex();
-        if (c == backCommand) {
-            AccountsWindow accountWindow = new AccountsWindow();
-            Accountant.setCurrent(accountWindow);
-        } else if (c == deleteCommand) {
-            deleteTransaction(selectedIndex);
-        } else if (c == editCommand) {
-            Transaction transaction = ((Transaction) transactions.elementAt(selectedIndex));
-            showTransactionForm(selectedIndex, transaction);
-        } else if (c == depositeCommand) {
-            Transaction transaction = new Transaction();
-            transaction.primaryAccountID = account.id;
-            showTransactionForm(TRANSACTION_DEPOSITE, transaction);
-        } else if (c == spendCommand) {
-            Transaction transaction = new Transaction();
-            transaction.primaryAccountID = account.id;
-            showTransactionForm(TRANSACTION_SPEND, transaction);
-        } else if (c == transferCommand) {
-            Transaction transaction = new Transaction();
-            transaction.primaryAccountID = account.id;
-            transaction.transfer = true;
-            showTransactionForm(TRANSACTION_TRANSFER, transaction);
+            Dialog.show("Empty Transaction list", "Please add a transaction", "Ok", "Cancel");
         }
     }
 
+    private void refreshTransactions() {
+        //refreshing transactionList
+        transactions = Database.getTransactions(account);
+        String[][] tableData = new String[transactions.size()][3];
+        for (int i = 0; i < transactions.size(); i++) {
+            Transaction transaction = (Transaction) transactions.elementAt(i);
+            tableData[i][0] = Util.getDate(transaction.date);
+            tableData[i][1] = getDetail(transaction);
+            tableData[i][2] = getAmount(transaction, account);
+        }
+        DefaultTableModel tableModel = new DefaultTableModel(new String[]{"Date", "Desc", "Amount"}, tableData);
+        transactionTable.setModel(tableModel);
+
+        refreshCommands();
+    }
+
+//    private void updateTableData(int selectedIndex, Transaction transaction) {
+//        transactionTable.getModel().setValueAt(selectedIndex, 0, Util.getDate(transaction.date));
+//        transactionTable.getModel().setValueAt(selectedIndex, 1, getDetail(transaction));
+//        transactionTable.getModel().setValueAt(selectedIndex, 2, getAmount(transaction, account));
+//    }
     private void updateTransaction(int selectedIndex, Transaction transaction) {
         Database.updateTransaction(transaction);
-        transactions.removeElementAt(selectedIndex);
-        transactions.insertElementAt(transaction, selectedIndex);
-        String detail = getDetail(transaction);
-        set(selectedIndex, detail, null);
+//        transactions.removeElementAt(selectedIndex);
+//        transactions.insertElementAt(transaction, selectedIndex);
+//        updateTableData(selectedIndex, transaction);
+        refreshTransactions();
     }
 
     private void deleteTransaction(int selectedIndex) {
         Transaction transaction = (Transaction) transactions.elementAt(selectedIndex);
         Database.deleteTransaction(transaction);
-        transactions.removeElementAt(selectedIndex);
-        delete(selectedIndex);
-        refreshCommands();
+        refreshTransactions();
+
     }
 
     private void addTransaction(Transaction transaction) {
         Database.addTransaction(transaction);
-        transactions.insertElementAt(transaction, 0);
-        String detail = getDetail(transaction);
-        insert(0, detail, null);
-        refreshCommands();
+        refreshTransactions();
     }
 
     private void showTransactionForm(final int selectedIndex, Transaction transaction) {
@@ -134,21 +128,10 @@ public class TransactionWindow extends List implements CommandListener {
                         updateTransaction(selectedIndex, transaction);
                     }
                 }
-                Accountant.setCurrent(TransactionWindow.this);
+                TransactionWindow.this.show();
             }
         };
-        Accountant.setCurrent(transactionForm);
-    }
-
-    private void refreshTransactions() {
-        //refreshing transactionList
-        deleteAll();
-        transactions = Database.getTransactions(account);
-        for (int i = 0; i < transactions.size(); i++) {
-            Transaction transaction = (Transaction) transactions.elementAt(i);
-            String detail = getDetail(transaction);
-            append(detail, null);
-        }
+        transactionForm.show();
     }
 
     private void refreshCommands() {
@@ -164,28 +147,56 @@ public class TransactionWindow extends List implements CommandListener {
 
     private String getDetail(Transaction transaction) {
         StringBuffer sb = new StringBuffer();
-        sb.append(Util.getDate(transaction.date)).append(Util.NEW_LINE);
-
         if (transaction.transfer) {
             if (transaction.primaryAccountID == account.id) {
                 sb.append("Transfered to ");
-                sb.append(Database.getAccount(transaction.secondaryAccountID).name).append(Util.NEW_LINE);
+                sb.append(Database.getAccount(transaction.secondaryAccountID).name).append(" : ");
             } else {
                 sb.append("Deposited from ");
-                sb.append(Database.getAccount(transaction.primaryAccountID).name).append(Util.NEW_LINE);
+                sb.append(Database.getAccount(transaction.primaryAccountID).name).append(" : ");
             }
-            sb.append(transaction.description).append(Util.NEW_LINE);
-            if (transaction.primaryAccountID == account.id) {
-                sb.append("-").append(transaction.amount);
-            } else {
-                sb.append("").append(transaction.amount);
-            }
+            sb.append(transaction.description);
+
         } else {
-            sb.append(Database.getCategory(transaction.categoryID).name).append(" : ").append(Util.NEW_LINE);
-            sb.append(transaction.description).append(Util.NEW_LINE);
-            sb.append(transaction.amount);
+            sb.append(Database.getCategory(transaction.categoryID).name).append(" : ");
+            sb.append(transaction.description);
         }
 
         return sb.toString();
+    }
+
+    private String getAmount(Transaction transaction, Account account) {
+        if (transaction.transfer && transaction.primaryAccountID == account.id) {
+            return "-" + transaction.amount;
+        } else {
+            return "" + transaction.amount;
+        }
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+        Command c = ae.getCommand();
+        int selectedIndex = transactionTable.getSelectedRow();
+        if (c == backCommand) {
+            AccountsWindow accountWindow = new AccountsWindow();
+            accountWindow.show();
+        } else if (c == deleteCommand) {
+            deleteTransaction(selectedIndex);
+        } else if (c == editCommand) {
+            Transaction transaction = ((Transaction) transactions.elementAt(selectedIndex));
+            showTransactionForm(selectedIndex, transaction);
+        } else if (c == depositeCommand) {
+            Transaction transaction = new Transaction();
+            transaction.primaryAccountID = account.id;
+            showTransactionForm(TRANSACTION_DEPOSITE, transaction);
+        } else if (c == spendCommand) {
+            Transaction transaction = new Transaction();
+            transaction.primaryAccountID = account.id;
+            showTransactionForm(TRANSACTION_SPEND, transaction);
+        } else if (c == transferCommand) {
+            Transaction transaction = new Transaction();
+            transaction.primaryAccountID = account.id;
+            transaction.transfer = true;
+            showTransactionForm(TRANSACTION_TRANSFER, transaction);
+        }
     }
 }

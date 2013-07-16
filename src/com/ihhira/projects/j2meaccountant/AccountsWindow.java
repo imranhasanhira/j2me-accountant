@@ -4,21 +4,26 @@
  */
 package com.ihhira.projects.j2meaccountant;
 
+import com.ihhira.projects.j2meaccountant.model.Database;
+import com.ihhira.projects.j2meaccountant.model.Account;
+import com.sun.lwuit.Command;
+import com.sun.lwuit.Dialog;
+import com.sun.lwuit.Form;
+import com.sun.lwuit.List;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.layouts.BoxLayout;
+import com.sun.lwuit.list.DefaultListModel;
 import java.util.Vector;
-import javax.microedition.lcdui.AlertType;
-import javax.microedition.lcdui.Choice;
-import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.List;
 
 /**
  *
  * @author Imran
  */
-public class AccountsWindow extends List implements CommandListener {
+public class AccountsWindow extends Form implements ActionListener {
 
     Vector accounts;
+    List accountsList;
     private final Command exitCommand;
     private final Command settingsCommand;
     private final Command categoriesCommand;
@@ -28,19 +33,21 @@ public class AccountsWindow extends List implements CommandListener {
     private final Command showCommand;
 
     public AccountsWindow() {
-        super("Accounts", List.IMPLICIT);
-        setFitPolicy(Choice.TEXT_WRAP_ON);
+        super("All Accounts");
 
-        exitCommand = new Command("Exit", Command.EXIT, 0);
-        settingsCommand = new Command("Settings", Command.ITEM, 1);
-        categoriesCommand = new Command("Show Categories", Command.ITEM, 2);
-        deleteCommand = new Command("Delete Account", Command.ITEM, 3);
-        editCommand = new Command("Edit Account", Command.ITEM, 4);
-        addCommand = new Command("Add Account", Command.ITEM, 5);
+        setLayout(new BoxLayout(BoxLayout.Y_AXIS));
 
+        accountsList = new List();
+        addComponent(accountsList);
 
+        exitCommand = new Command("Exit");
+        settingsCommand = new Command("Settings");
+        categoriesCommand = new Command("Show Categories");
+        deleteCommand = new Command("Delete Account");
+        editCommand = new Command("Edit Account");
+        addCommand = new Command("Add Account");
 
-        showCommand = new Command("Show", Command.ITEM, 6);
+        showCommand = new Command("Transactions");
 
         addCommand(exitCommand);
         addCommand(settingsCommand);
@@ -50,45 +57,10 @@ public class AccountsWindow extends List implements CommandListener {
         addCommand(addCommand);
         addCommand(showCommand);
 
-        setCommandListener(this);
+        addCommandListener(this);
 
         refreshAccountList();
 
-    }
-
-    public void commandAction(Command c, Displayable d) {
-        int selectedIndex = getSelectedIndex();
-        if (c == exitCommand) {
-            Accountant.exit();
-        } else if (c == settingsCommand) {
-            Accountant.setCurrent("Info", "Coming soon", AlertType.INFO, this);
-        } else if (c == categoriesCommand) {
-            CategoriesWindow categoriesWindow = new CategoriesWindow("Categories");
-            Accountant.setCurrent(categoriesWindow);
-        } else if (c == deleteCommand) {
-            if (selectedIndex != -1) {
-                Account account = (Account) accounts.elementAt(selectedIndex);
-                Database.deleteAccount(account);
-                accounts.removeElementAt(selectedIndex);
-                delete(selectedIndex);
-            }
-        } else if (c == editCommand) {
-            if (selectedIndex != -1) {
-                Account account = (Account) accounts.elementAt(selectedIndex);
-                Log.log("Editing account - " + account);
-                showExistingAccountForm(account);
-            }
-        } else if (c == addCommand) {
-            Log.log("Adding account");
-            showNewAccountForm();
-        } else if (c == showCommand) {
-            if (selectedIndex != -1) {
-                Account account = (Account) accounts.elementAt(selectedIndex);
-                Log.log("Showing account - " + account);
-                TransactionWindow tw = new TransactionWindow(account);
-                Accountant.setCurrent(tw);
-            }
-        }
     }
 
     private void showNewAccountForm() {
@@ -105,11 +77,13 @@ public class AccountsWindow extends List implements CommandListener {
      * param is null
      */
     private void showAcountForm(final Account existingAccount) {
+        String title = existingAccount == null ? "New account" : "Edit account";
         String existingName = (existingAccount == null ? "" : existingAccount.name);
-        DialogBox dialogBox = new DialogBox(this, "New Account", "Account name", existingName, 30) {
-            protected void actionPerformed(int response, String text) {
-                if (response == DialogBox.RESPONSE_TYPE_OK && text.length() > 0) {
 
+
+        InputForm accountInputForm = new InputForm(this, title, "name", existingName) {
+            protected void formSubmitted(int response, String text) {
+                if (response == InputForm.RESPONSE_TYPE_OK && text.length() > 0) {
                     if (existingAccount == null) {
                         Account acc = new Account(text);
                         Database.addAccount(acc);
@@ -121,15 +95,60 @@ public class AccountsWindow extends List implements CommandListener {
                 }
             }
         };
-        dialogBox.show();
+        accountInputForm.show();
     }
 
     private void refreshAccountList() {
-        this.deleteAll();
         accounts = Database.getAccounts();
+        DefaultListModel listModel = new DefaultListModel();
         for (int i = 0; i < accounts.size(); i++) {
             Account acc = (Account) accounts.elementAt(i);
-            append(acc.name + " : " + Database.getAccountBalance(acc), null);
+            listModel.addItem(acc.name + " : " + Database.getAccountBalance(acc));
+        }
+        accountsList.setModel(listModel);
+    }
+
+    public void actionPerformed(ActionEvent ae) {
+        Command c = ae.getCommand();
+
+        int selectedIndex = accountsList.getSelectedIndex();
+        if (c == exitCommand) {
+            AccountantMidlet.exit();
+        } else if (c == settingsCommand) {
+//            SettingsWindow settingsWindow = new SettingsWindow();
+//            settingsWindow.show();
+            Dialog.show("Wait", "Coming soon...", "Ok", "Cancel");
+        } else if (c == categoriesCommand) {
+            CategoriesWindow categoriesWindow = new CategoriesWindow("Categories");
+            categoriesWindow.show();
+
+        } else if (c == deleteCommand) {
+            if (selectedIndex != -1) {
+                Account account = (Account) accounts.elementAt(selectedIndex);
+                Database.deleteAccount(account);
+                accounts.removeElementAt(selectedIndex);
+                accountsList.getModel().removeItem(selectedIndex);
+            }
+
+        } else if (c == editCommand) {
+            if (selectedIndex != -1) {
+                Account account = (Account) accounts.elementAt(selectedIndex);
+                Log.log("Editing account - " + account);
+                showExistingAccountForm(account);
+            }
+
+        } else if (c == addCommand) {
+            Log.log("Adding account");
+            showNewAccountForm();
+
+        } else if (c == showCommand) {
+            if (selectedIndex != -1) {
+                Account account = (Account) accounts.elementAt(selectedIndex);
+                Log.log("Showing account - " + account);
+                TransactionWindow transactionWindow = new TransactionWindow(account);
+                transactionWindow.show();
+            }
+
         }
     }
 }

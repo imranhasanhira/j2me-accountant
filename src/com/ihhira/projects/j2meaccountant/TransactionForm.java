@@ -4,14 +4,21 @@
  */
 package com.ihhira.projects.j2meaccountant;
 
+import com.ihhira.projects.j2meaccountant.model.Category;
+import com.ihhira.projects.j2meaccountant.model.Database;
+import com.ihhira.projects.j2meaccountant.model.Account;
+import com.ihhira.projects.j2meaccountant.model.Transaction;
+import com.sun.lwuit.ComboBox;
+import com.sun.lwuit.Command;
+import com.sun.lwuit.Dialog;
+import com.sun.lwuit.Form;
+import com.sun.lwuit.Label;
+import com.sun.lwuit.TextArea;
+import com.sun.lwuit.TextField;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.layouts.BoxLayout;
 import java.util.Vector;
-import javax.microedition.lcdui.AlertType;
-import javax.microedition.lcdui.ChoiceGroup;
-import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.Form;
-import javax.microedition.lcdui.TextField;
 
 /**
  *
@@ -23,13 +30,14 @@ public abstract class TransactionForm extends Form {
     public static final int RESPONSE_TYPE_CANCEL = 1;
     Vector accountsVector;
     Vector categoriesVector;
-    ChoiceGroup secondaryAccount;
-    ChoiceGroup category;
+    ComboBox secondaryAccountComboBox;
+    ComboBox categoryComboBox;
     TextField description;
     TextField amount;
 
     public TransactionForm(String title, final Transaction transaction) {
         super(title);
+        setLayout(new BoxLayout(BoxLayout.Y_AXIS));
 
         if (transaction.transfer) {
             prepateSecondaryAccountChoiceGroup(transaction);
@@ -37,44 +45,46 @@ public abstract class TransactionForm extends Form {
             prepareCategoryChoiceGroup(transaction);
         }
         //
-        description = new TextField("Description", transaction.description, 50, TextField.ANY);
-        append(description);
+        addComponent(new Label("Description"));
+        description = new TextField(transaction.description);
+        addComponent(TextArea.ANY, description);
 
         //
-        amount = new TextField("Amount", "" + transaction.amount, 20, TextField.DECIMAL);
-        append(amount);
+        addComponent(new Label("Amount"));
+        amount = new TextField("" + transaction.amount);
+        addComponent(TextArea.DECIMAL, amount);
 
 
-        addCommand(new Command("Cancel", Command.CANCEL, RESPONSE_TYPE_CANCEL));
-        addCommand(new Command("OK", Command.OK, RESPONSE_TYPE_OK));
+        addCommand(new Command("OK", RESPONSE_TYPE_OK));
+        addCommand(new Command("Cancel", RESPONSE_TYPE_CANCEL));
 
-        setCommandListener(new CommandListener() {
-            public void commandAction(Command c, Displayable d) {
+        addCommandListener(new ActionListener() {
+            public void actionPerformed(ActionEvent ae) {
+                Command command = ae.getCommand();
                 try {
-                    if (c.getCommandType() == Command.OK) {
-                        transaction.description = description.getString();
+                    if (command.getId() == RESPONSE_TYPE_OK) {
+                        transaction.description = description.getText();
                         try {
-                            transaction.amount = Double.parseDouble(amount.getString());
+                            transaction.amount = Double.parseDouble(amount.getText());
                         } catch (Exception ex) {
                             throw new Exception("amount is not correct");
                         }
 
                         if (transaction.transfer) {
-                            Log.log("selected account index = " + secondaryAccount.getSelectedIndex());
-                            transaction.secondaryAccountID = ((Account) accountsVector.elementAt(secondaryAccount.getSelectedIndex())).id;
+                            Log.log("selected account index = " + secondaryAccountComboBox.getSelectedIndex());
+                            transaction.secondaryAccountID = ((Account) accountsVector.elementAt(secondaryAccountComboBox.getSelectedIndex())).id;
                             if (transaction.secondaryAccountID == transaction.primaryAccountID) {
                                 throw new Exception("Please select another account");
                             }
                         } else {
-                            Log.log("selected category index = " + category.getSelectedIndex());
-                            transaction.categoryID = ((Category) categoriesVector.elementAt(category.getSelectedIndex())).id;
+                            Log.log("selected category index = " + categoryComboBox.getSelectedIndex());
+                            transaction.categoryID = ((Category) categoriesVector.elementAt(categoryComboBox.getSelectedIndex())).id;
                         }
                     }
-                    int responseType = (c.getCommandType() == Command.OK ? RESPONSE_TYPE_OK : RESPONSE_TYPE_CANCEL);
-                    formSubmitted(responseType, transaction);
+                    formSubmitted(command.getId(), transaction);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Accountant.setCurrent("Error", e.getMessage(), AlertType.ERROR, TransactionForm.this);
+                    Dialog.show("Error", e.getMessage(), "Ok", "Cancel");
                 }
             }
         });
@@ -84,35 +94,37 @@ public abstract class TransactionForm extends Form {
 
     private void prepateSecondaryAccountChoiceGroup(final Transaction transaction) {
         accountsVector = Database.getAccounts();
-        String[] accounts = new String[accountsVector.size()];
+        String[] accountNames = new String[accountsVector.size()];
         int selectedAccountIndex = -1;
-        for (int i = 0; i < accounts.length; i++) {
-            accounts[i] = ((Account) accountsVector.elementAt(i)).name;
+        for (int i = 0; i < accountNames.length; i++) {
+            accountNames[i] = ((Account) accountsVector.elementAt(i)).name;
             if (transaction.secondaryAccountID == ((Account) accountsVector.elementAt(i)).id) {
                 selectedAccountIndex = i;
             }
         }
-        secondaryAccount = new ChoiceGroup("To", ChoiceGroup.POPUP, accounts, null);
-        append(secondaryAccount);
+        addComponent(new Label("To"));
+        secondaryAccountComboBox = new ComboBox(accountNames);
+        addComponent(secondaryAccountComboBox);
         if (selectedAccountIndex != -1) {
-            secondaryAccount.setSelectedIndex(selectedAccountIndex, true);
+            secondaryAccountComboBox.setSelectedIndex(selectedAccountIndex, true);
         }
     }
 
     private void prepareCategoryChoiceGroup(final Transaction transaction) {
         categoriesVector = Database.getCategories();
-        String[] categories = new String[categoriesVector.size()];
+        String[] categoryNames = new String[categoriesVector.size()];
         int selectedCategoryIndex = -1;
-        for (int i = 0; i < categories.length; i++) {
-            categories[i] = ((Category) categoriesVector.elementAt(i)).name;
+        for (int i = 0; i < categoryNames.length; i++) {
+            categoryNames[i] = ((Category) categoriesVector.elementAt(i)).name;
             if (transaction.id == ((Category) categoriesVector.elementAt(i)).id) {
                 selectedCategoryIndex = i;
             }
         }
-        category = new ChoiceGroup("Category", ChoiceGroup.POPUP, categories, null);
-        append(category);
+        addComponent(new Label("Category"));
+        categoryComboBox = new ComboBox(categoryNames);
+        addComponent(categoryComboBox);
         if (selectedCategoryIndex != -1) {
-            category.setSelectedIndex(selectedCategoryIndex, true);
+            categoryComboBox.setSelectedIndex(selectedCategoryIndex, true);
         }
     }
 }

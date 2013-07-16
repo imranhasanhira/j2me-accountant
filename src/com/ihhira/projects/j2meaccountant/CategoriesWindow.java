@@ -4,114 +4,93 @@
  */
 package com.ihhira.projects.j2meaccountant;
 
+
+import com.ihhira.projects.j2meaccountant.model.Category;
+import com.ihhira.projects.j2meaccountant.model.Database;
+import com.sun.lwuit.Command;
+import com.sun.lwuit.Form;
+import com.sun.lwuit.List;
+import com.sun.lwuit.events.ActionEvent;
+import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.list.DefaultListModel;
 import java.util.Vector;
-import javax.microedition.lcdui.Choice;
-import javax.microedition.lcdui.Command;
-import javax.microedition.lcdui.CommandListener;
-import javax.microedition.lcdui.Displayable;
-import javax.microedition.lcdui.List;
 
 /**
  *
  * @author Imran
  */
-public class CategoriesWindow extends List implements CommandListener {
+public class CategoriesWindow extends Form implements ActionListener {
 
     Vector categories;
+    List categoriesList;
     private final Command backCommand;
     private final Command deleteCommand;
     private final Command editCommand;
     private final Command addCommand;
 
     public CategoriesWindow(String title) {
-        super(title, List.IMPLICIT);
-        setFitPolicy(Choice.TEXT_WRAP_ON);
+        super(title);
+        categoriesList = new List();
+        setPreferredW(240);
+        addComponent(categoriesList);
 
-        backCommand = new Command("Back", Command.BACK, 0);
-        deleteCommand = new Command("Delete Category", Command.ITEM, 1);
-        editCommand = new Command("Edit Category", Command.ITEM, 2);
-        addCommand = new Command("Add Category", Command.ITEM, 3);
+        backCommand = new Command("Back");
+        deleteCommand = new Command("Delete Category");
+        editCommand = new Command("Edit Category");
+        addCommand = new Command("Add Category");
 
         addCommand(backCommand);
         addCommand(addCommand);
-        setCommandListener(this);
-
+        this.addCommandListener(this);
 
         refreshCategories();
-        refreshCommands();
-    }
-
-    public void commandAction(Command c, Displayable d) {
-        int selectedIndex = getSelectedIndex();
-        if (c == backCommand) {
-            AccountsWindow accountWindow = new AccountsWindow();
-            Accountant.setCurrent(accountWindow);
-        } else if (c == deleteCommand) {
-            deleteCategory(selectedIndex);
-        } else if (c == editCommand) {
-            showCategoriesForm(selectedIndex);
-        } else if (c == addCommand) {
-            showCategoriesForm(-1);
-        }
-    }
-
-    private void refreshCommands() {
-        //refreshing commands
-        if (categories.size() > 0) {
-            addCommand(deleteCommand);
-            addCommand(editCommand);
-        } else {
-            removeCommand(deleteCommand);
-            removeCommand(editCommand);
-        }
     }
 
     private void refreshCategories() {
-        deleteAll();
         categories = Database.getCategories();
+        DefaultListModel listModel = new DefaultListModel();
         for (int i = 0; i < categories.size(); i++) {
-            append(((Category) categories.elementAt(i)).name, null);
+            listModel.addItem(((Category) categories.elementAt(i)).name);
         }
+        categoriesList.setModel(listModel);
     }
 
-    private void deleteCategory(int selectedIndex) {
-        Category category = (Category) categories.elementAt(selectedIndex);
-        Database.deleteCategory(category);
-        refreshCategories();
-    }
+    private void showCategoriesForm(final Category category) {
+        String title = category == null ? "New Category" : "Edit category";
+        String text = category == null ? "" : category.name;
 
-    private void showCategoriesForm(final int selectedIndex) {
-        Category cat = null;
-        if (selectedIndex == -1) {
-            cat = new Category();
-        } else {
-            cat = ((Category) categories.elementAt(selectedIndex));
-        }
-
-        DialogBox dialogBox = new DialogBox(this, "New Category", "Category name", cat.name, 30) {
-            protected void actionPerformed(int response, String text) {
+        InputForm categoryInputForm = new InputForm(this, title, "Name", text) {
+            protected void formSubmitted(int response, String text) {
                 if (response == RESPONSE_TYPE_OK && text.length() > 0) {
-                    if (selectedIndex == -1) {
-                        addCategory(text);
+                    if (category == null) {
+                        Category category = new Category(text);
+                        Database.addCategory(category);
+                        refreshCategories();
                     } else {
-                        updateCategory(selectedIndex, text);
+                        category.name = text;
+                        Database.updateCategory(category);
+                        refreshCategories();
                     }
                 }
             }
         };
-        dialogBox.show();
+        categoryInputForm.show();
     }
 
-    private void addCategory(String name) {
-        Category category = new Category(name);
-        Database.addCategory(category);
-        refreshCategories();
-    }
-
-    private void updateCategory(int selectedIndex, String text) {
-        Category category = (Category) categories.elementAt(selectedIndex);
-        category.name = text;
-        Database.updateCategory(category);
-        refreshCategories();
+    public void actionPerformed(ActionEvent ae) {
+        int selectedIndex = categoriesList.getSelectedIndex();
+        Command c = ae.getCommand();
+        if (c == backCommand) {
+            AccountsWindow accountWindow = new AccountsWindow();
+            accountWindow.show();
+        } else if (c == deleteCommand) {
+            Category category = (Category) categories.elementAt(selectedIndex);
+            Database.deleteCategory(category);
+            refreshCategories();
+        } else if (c == editCommand) {
+            showCategoriesForm((Category) categories.elementAt(selectedIndex));
+        } else if (c == addCommand) {
+            showCategoriesForm(null);
+        }
     }
 }

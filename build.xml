@@ -89,7 +89,7 @@
         Linux: /opt/floggy
         Windows: c:\floggy
     -->
-    <property name="floggy.path" value="E:\CoCuri\Netbeans_Projects\j2me-accountant\floggy\"/>
+    <property name="floggy.path" value="floggy\"/>
     
     <path id="floggy.classpath">
         <fileset dir="${floggy.path}\lib" includes="*.jar"/>
@@ -106,4 +106,7 @@
             input="${build.classes.dir}"
             output="${build.classes.dir}"/>
     </target>
+    
+    
+    
 </project>
