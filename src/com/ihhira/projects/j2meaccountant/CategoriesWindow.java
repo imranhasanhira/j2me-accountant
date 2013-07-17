@@ -4,7 +4,6 @@
  */
 package com.ihhira.projects.j2meaccountant;
 
-
 import com.ihhira.projects.j2meaccountant.model.Category;
 import com.ihhira.projects.j2meaccountant.model.Database;
 import com.sun.lwuit.Command;
@@ -12,6 +11,7 @@ import com.sun.lwuit.Form;
 import com.sun.lwuit.List;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.layouts.BoxLayout;
 import com.sun.lwuit.list.DefaultListModel;
 import java.util.Vector;
 
@@ -30,6 +30,8 @@ public class CategoriesWindow extends Form implements ActionListener {
 
     public CategoriesWindow(String title) {
         super(title);
+        setLayout(new BoxLayout(BoxLayout.Y_AXIS));
+
         categoriesList = new List();
         setPreferredW(240);
         addComponent(categoriesList);

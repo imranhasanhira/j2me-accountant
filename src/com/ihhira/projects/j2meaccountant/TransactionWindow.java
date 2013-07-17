@@ -8,12 +8,18 @@ import com.ihhira.projects.j2meaccountant.model.Database;
 import com.ihhira.projects.j2meaccountant.model.Account;
 import com.ihhira.projects.j2meaccountant.model.Transaction;
 import com.sun.lwuit.Command;
+import com.sun.lwuit.Component;
 import com.sun.lwuit.Dialog;
+import com.sun.lwuit.Font;
 import com.sun.lwuit.Form;
+import com.sun.lwuit.TextArea;
+import com.sun.lwuit.TextField;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
+import com.sun.lwuit.layouts.FlowLayout;
 import com.sun.lwuit.table.DefaultTableModel;
 import com.sun.lwuit.table.Table;
+import java.util.Date;
 import java.util.Vector;
 
 /**
@@ -38,9 +44,36 @@ public class TransactionWindow extends Form implements ActionListener {
     TransactionWindow(Account account) {
         super(account.toString());
         this.account = account;
-        transactionTable = new Table();
-        addComponent(transactionTable);
+        setLayout(new FlowLayout(LEFT));
 
+        final int dateColumnWidth = Font.getDefaultFont().stringWidth(Util.getDate(new Date()));
+        final int amountColumnWidth = Font.getDefaultFont().stringWidth("00000000000");
+        transactionTable = new Table() {
+            protected Component createCell(Object value, int row, int column, boolean editable) {
+
+                if (column == 0) {
+                    TextField textField = new TextField(value.toString());
+                    textField.setEditable(false);
+                    textField.setPreferredW(dateColumnWidth);
+                    return textField;
+                    
+                } else if (column == 2) {
+                    TextField textField = new TextField(value.toString());
+                    textField.setEditable(false);
+                    textField.setAlignment(TextField.RIGHT);
+                    textField.setPreferredW(amountColumnWidth);
+                    return textField;
+
+                } else {
+                    TextArea textArea = new TextArea(value.toString());
+                    textArea.setEditable(false);
+                    return textArea;
+                }
+            }
+        };
+        removeAll();
+        addComponent(transactionTable);
+        setScrollable(true);
 
         backCommand = new Command("Back");
         deleteCommand = new Command("Delete");
@@ -73,9 +106,9 @@ public class TransactionWindow extends Form implements ActionListener {
             tableData[i][1] = getDetail(transaction);
             tableData[i][2] = getAmount(transaction, account);
         }
-        DefaultTableModel tableModel = new DefaultTableModel(new String[]{"Date", "Desc", "Amount"}, tableData);
+        String[] columnNames = new String[]{"Date", "Desc", "Amount"};
+        DefaultTableModel tableModel = new DefaultTableModel(columnNames, tableData);
         transactionTable.setModel(tableModel);
-
         refreshCommands();
     }
 
@@ -86,9 +119,6 @@ public class TransactionWindow extends Form implements ActionListener {
 //    }
     private void updateTransaction(int selectedIndex, Transaction transaction) {
         Database.updateTransaction(transaction);
-//        transactions.removeElementAt(selectedIndex);
-//        transactions.insertElementAt(transaction, selectedIndex);
-//        updateTableData(selectedIndex, transaction);
         refreshTransactions();
     }
 
@@ -176,12 +206,13 @@ public class TransactionWindow extends Form implements ActionListener {
     public void actionPerformed(ActionEvent ae) {
         Command c = ae.getCommand();
         int selectedIndex = transactionTable.getSelectedRow();
+        Log.log("selected index " + selectedIndex);
         if (c == backCommand) {
             AccountsWindow accountWindow = new AccountsWindow();
             accountWindow.show();
-        } else if (c == deleteCommand) {
+        } else if (c == deleteCommand && selectedIndex >= 0) {
             deleteTransaction(selectedIndex);
-        } else if (c == editCommand) {
+        } else if (c == editCommand && selectedIndex >= 0) {
             Transaction transaction = ((Transaction) transactions.elementAt(selectedIndex));
             showTransactionForm(selectedIndex, transaction);
         } else if (c == depositeCommand) {

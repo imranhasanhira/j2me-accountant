@@ -13,7 +13,6 @@ import com.sun.lwuit.Command;
 import com.sun.lwuit.Dialog;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.Label;
-import com.sun.lwuit.TextArea;
 import com.sun.lwuit.TextField;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -44,15 +43,20 @@ public abstract class TransactionForm extends Form {
         } else {
             prepareCategoryChoiceGroup(transaction);
         }
-        //
+
+        //        
         addComponent(new Label("Description"));
         description = new TextField(transaction.description);
-        addComponent(TextArea.ANY, description);
+        description.setConstraint(TextField.ANY);
+        addComponent(description);
+
 
         //
         addComponent(new Label("Amount"));
         amount = new TextField("" + transaction.amount);
-        addComponent(TextArea.DECIMAL, amount);
+        amount.setConstraint(TextField.DECIMAL);
+        addComponent(amount);
+
 
 
         addCommand(new Command("OK", RESPONSE_TYPE_OK));

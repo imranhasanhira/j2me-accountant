@@ -14,7 +14,6 @@ import java.util.Date;
 public class Util {
 
     public static final String NEW_LINE = "\r\f";
-    
     private static final Calendar calendar = Calendar.getInstance();
     private static final String[] months = new String[]{
         "January",

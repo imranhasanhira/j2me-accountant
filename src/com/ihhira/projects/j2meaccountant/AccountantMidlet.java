@@ -5,8 +5,8 @@
 package com.ihhira.projects.j2meaccountant;
 
 import com.ihhira.projects.j2meaccountant.model.Database;
-import com.ihhira.projects.j2meaccountant.model.Settings;
 import com.sun.lwuit.Display;
+import com.sun.lwuit.Font;
 import com.sun.lwuit.plaf.UIManager;
 import com.sun.lwuit.util.Resources;
 import java.io.IOException;
@@ -22,17 +22,18 @@ public class AccountantMidlet extends MIDlet {
     public void startApp() {
         Display.init(this);
         Database.init();
-        
+
         accountantMidlet = this;
+
+        
+
         try {
             Resources resource = Resources.open("/lwuitResource.res");
-            UIManager.getInstance().setThemeProps(resource.getTheme("classic"));
+            UIManager.getInstance().setThemeProps(resource.getTheme("touch"));
         } catch (IOException ioe) {
             Log.log("Couldn't load theme.");
             ioe.printStackTrace();
         }
-
-
 
         AccountsWindow accountsWindow = new AccountsWindow();
         accountsWindow.show();

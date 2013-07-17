@@ -31,6 +31,7 @@ public class AccountsWindow extends Form implements ActionListener {
     private final Command editCommand;
     private final Command addCommand;
     private final Command showCommand;
+    private final Command aboutCommand;
 
     public AccountsWindow() {
         super("All Accounts");
@@ -41,6 +42,7 @@ public class AccountsWindow extends Form implements ActionListener {
         addComponent(accountsList);
 
         exitCommand = new Command("Exit");
+        aboutCommand = new Command("About");
         settingsCommand = new Command("Settings");
         categoriesCommand = new Command("Show Categories");
         deleteCommand = new Command("Delete Account");
@@ -50,6 +52,7 @@ public class AccountsWindow extends Form implements ActionListener {
         showCommand = new Command("Transactions");
 
         addCommand(exitCommand);
+        addCommand(aboutCommand);
         addCommand(settingsCommand);
         addCommand(categoriesCommand);
         addCommand(deleteCommand);
@@ -114,6 +117,9 @@ public class AccountsWindow extends Form implements ActionListener {
         int selectedIndex = accountsList.getSelectedIndex();
         if (c == exitCommand) {
             AccountantMidlet.exit();
+        } else if (c == aboutCommand) {
+            Dialog.show("About", "This app has been developed by Md Imran Hasan Hira."
+                    + " For any contact please email me at imranhasanhira@gmail.com", Dialog.TYPE_INFO, null, "Ok", "Cancel");
         } else if (c == settingsCommand) {
 //            SettingsWindow settingsWindow = new SettingsWindow();
 //            settingsWindow.show();
@@ -125,9 +131,16 @@ public class AccountsWindow extends Form implements ActionListener {
         } else if (c == deleteCommand) {
             if (selectedIndex != -1) {
                 Account account = (Account) accounts.elementAt(selectedIndex);
-                Database.deleteAccount(account);
-                accounts.removeElementAt(selectedIndex);
-                accountsList.getModel().removeItem(selectedIndex);
+
+                Dialog dialog = new Dialog();
+                boolean responseOK = dialog.show("Delete Account",
+                        "Do you want to delete '" + account.name + "'",
+                        Dialog.TYPE_CONFIRMATION, null, "Yes", "No");
+                if (responseOK) {
+                    Database.deleteAccount(account);
+                    accounts.removeElementAt(selectedIndex);
+                    accountsList.getModel().removeItem(selectedIndex);
+                }
             }
 
         } else if (c == editCommand) {

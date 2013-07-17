@@ -7,6 +7,7 @@ package com.ihhira.projects.j2meaccountant;
 import com.sun.lwuit.Command;
 import com.sun.lwuit.Form;
 import com.sun.lwuit.Label;
+import com.sun.lwuit.TextArea;
 import com.sun.lwuit.TextField;
 import com.sun.lwuit.events.ActionEvent;
 import com.sun.lwuit.events.ActionListener;
@@ -28,7 +29,7 @@ public abstract class InputForm extends Form {
         this.previousForm = previousForm;
         addComponent(new Label(label));
 
-        textField = new TextField(text);
+        textField = new TextField(text, 20);
         addComponent(textField);
 
 
