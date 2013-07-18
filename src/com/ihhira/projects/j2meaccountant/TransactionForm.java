@@ -54,7 +54,7 @@ public abstract class TransactionForm extends Form {
         //
         addComponent(new Label("Amount"));
         amount = new TextField("" + transaction.amount);
-        amount.setConstraint(TextField.DECIMAL);
+        amount.setConstraint(TextField.ANY);
         addComponent(amount);
 
 

@@ -129,7 +129,7 @@ public class AccountsWindow extends Form implements ActionListener {
             categoriesWindow.show();
 
         } else if (c == deleteCommand) {
-            if (selectedIndex != -1) {
+            if (selectedIndex >= 0 && selectedIndex < accounts.size()) {
                 Account account = (Account) accounts.elementAt(selectedIndex);
 
                 Dialog dialog = new Dialog();
@@ -144,7 +144,7 @@ public class AccountsWindow extends Form implements ActionListener {
             }
 
         } else if (c == editCommand) {
-            if (selectedIndex != -1) {
+            if (selectedIndex >= 0 && selectedIndex < accounts.size()) {
                 Account account = (Account) accounts.elementAt(selectedIndex);
                 Log.log("Editing account - " + account);
                 showExistingAccountForm(account);
@@ -155,7 +155,7 @@ public class AccountsWindow extends Form implements ActionListener {
             showNewAccountForm();
 
         } else if (c == showCommand) {
-            if (selectedIndex != -1) {
+            if (selectedIndex >= 0 && selectedIndex < accounts.size()) {
                 Account account = (Account) accounts.elementAt(selectedIndex);
                 Log.log("Showing account - " + account);
                 TransactionWindow transactionWindow = new TransactionWindow(account);

@@ -50,7 +50,6 @@ public class TransactionWindow extends Form implements ActionListener {
         final int amountColumnWidth = Font.getDefaultFont().stringWidth("00000000000");
         transactionTable = new Table() {
             protected Component createCell(Object value, int row, int column, boolean editable) {
-
                 if (column == 0) {
                     TextField textField = new TextField(value.toString());
                     textField.setEditable(false);
@@ -103,6 +102,7 @@ public class TransactionWindow extends Form implements ActionListener {
         for (int i = 0; i < transactions.size(); i++) {
             Transaction transaction = (Transaction) transactions.elementAt(i);
             tableData[i][0] = Util.getDate(transaction.date);
+//            Log.log(tableData[i][0]);
             tableData[i][1] = getDetail(transaction);
             tableData[i][2] = getAmount(transaction, account);
         }
